@@ -1,1 +1,424 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BMPD - EN/KR Toggle</title>
+  <style>
+    :root{
+      --bg:#f4f1ea;
+      --panel:#ffffff;
+      --border:#d9d3c9;
+      --text:#222;
+      --muted:#666;
+      --header:#2c2c2c;
+      --tab:#e7e2d9;
+      --tabActive:#ffffff;
+      --btn:#2c2c2c;
+      --btnText:#fff;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:760px; margin:0 auto; padding:18px 12px 36px; }
 
+    .topbar{
+      background:var(--header); color:#fff; border-radius:8px;
+      padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .topbar .title{ font-weight:700; font-size:14px; text-align:center; flex:1; }
+    .lang{
+      display:flex; align-items:center; gap:8px; white-space:nowrap;
+    }
+    .lang .lbl{ font-size:12px; opacity:.9; }
+    .lang button{
+      border:1px solid rgba(255,255,255,.35);
+      background:transparent; color:#fff; padding:6px 10px;
+      border-radius:6px; cursor:pointer; font-weight:700; font-size:12px;
+    }
+    .lang button.active{ background:#fff; color:#000; border-color:#fff; }
+
+    .tabs{
+      margin-top:12px;
+      display:flex;
+      background:var(--tab);
+      border:1px solid var(--border);
+      border-bottom:none;
+      border-radius:8px 8px 0 0;
+      overflow:hidden;
+    }
+    .tab{
+      flex:1;
+      text-align:center;
+      padding:11px 10px;
+      font-weight:700;
+      cursor:pointer;
+      border-right:1px solid var(--border);
+      font-size:13px;
+    }
+    .tab:last-child{ border-right:none; }
+    .tab.active{ background:var(--tabActive); }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:0 0 8px 8px;
+      padding:14px;
+    }
+
+    label{ display:block; font-size:13px; margin:10px 0 6px; }
+    select, input[type="text"], textarea, input[type="datetime-local"]{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--border);
+      border-radius:4px;
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{ min-height:90px; resize:vertical; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    .btn{
+      margin-top:14px;
+      width:100%;
+      padding:12px 14px;
+      border:none;
+      background:var(--btn);
+      color:var(--btnText);
+      font-weight:800;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    .out{
+      margin-top:14px;
+      border:1px dashed var(--border);
+      background:#fff;
+      padding:10px;
+      border-radius:6px;
+      display:none;
+    }
+    .out pre{ margin:0; white-space:pre-wrap; font-size:13px; }
+    .out .rowbtns{ display:flex; gap:10px; margin-top:10px; }
+    .out .mini{
+      padding:10px 12px; border:1px solid var(--border); background:#fff; cursor:pointer; border-radius:6px; font-weight:700;
+      flex:1;
+    }
+
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div style="width:84px;"></div>
+      <div class="title" id="pageTitle">Parameter 변경이력 및 부동&작업내역 양식 입력</div>
+      <div class="lang">
+        <span class="lbl" id="langLabel">언어</span>
+        <button type="button" id="btnKR" class="active">KR</button>
+        <button type="button" id="btnEN">EN</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabA">Para/IP 변경공유</div>
+      <div class="tab" id="tabB">부동내역 공유</div>
+    </div>
+
+    <div class="panel">
+      <!-- COMMON (matches screenshots) -->
+      <label id="lblType">종류 :</label>
+      <select id="type">
+        <option value="BM">BM</option>
+        <option value="PD">PD</option>
+        <option value="PM">PM</option>
+        <option value="PROD_READY">생산준비</option>
+      </select>
+
+      <label id="lblSite">0. Site :</label>
+      <select id="site"></select>
+
+      <label id="lblLine">1. 호기 :</label>
+      <select id="line"></select>
+
+      <label id="lblMachine">2-1. Machine :</label>
+      <select id="machine"></select>
+
+      <label id="lblUnit">2-2. Unit :</label>
+      <select id="unit"></select>
+
+      <label id="lblAssy">2-3. Assy :</label>
+      <select id="assy"></select>
+
+      <div class="grid2">
+        <div>
+          <label id="lblStart">3-1. 발생시간 :</label>
+          <input id="startTime" type="datetime-local" />
+        </div>
+        <div>
+          <label id="lblEnd">3-2. 조치완료 :</label>
+          <input id="endTime" type="datetime-local" />
+        </div>
+      </div>
+
+      <label id="lblWorker">4. 작업자 :</label>
+      <input id="worker" type="text" placeholder="작업자 이름" />
+
+      <label id="lblSymptom">5. 현상 :</label>
+      <textarea id="symptom" placeholder="현상 입력"></textarea>
+
+      <label id="lblCause">6. 원인 :</label>
+      <textarea id="cause" placeholder="원인 입력"></textarea>
+
+      <label id="lblAction">7. 조치 :</label>
+      <textarea id="action" placeholder="조치 내용 입력"></textarea>
+
+      <button class="btn" id="btnGenerate">양식 생성하기</button>
+      <div class="hint" id="hintText">생성 후 결과를 복사해서 공유할 수 있습니다.</div>
+
+      <div class="out" id="outBox">
+        <pre id="outText"></pre>
+        <div class="rowbtns">
+          <button class="mini" id="btnCopy">Copy</button>
+          <button class="mini" id="btnClear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- DATA (cascading dropdowns like your screenshots) ----------
+  const DATA = {
+    sites: ["NSE"],
+    lines: [
+      "-", "1-1","1-2","1-3","1-4","1-5","1-H",
+      "2-1","2-2","2-3","2-4","2-5","2-H",
+      "3-1","3-2","3-3","3-4","3-5",
+      "4-1","4-2"
+    ],
+    machines: ["-", "Electrode Supply", "Lamination", "D-Stacking", "Taper", "Inspection"],
+    unitsByMachine: {
+      "Electrode Supply": ["-","Cell.Inspector","Cell.Feeder","Cell.Transfer"],
+      "Lamination": ["-","Cell Inspector","LMS","HalfCell.Stack","HalfCell.Loading","[01]StackedCell.Taper","[02]StackedCell.Taper"],
+      "D-Stacking": ["-","[01]Cell.Stacker","[02]Cell.Stacker","[03]Cell.Stacker","Cell.Stack Vision"],
+      "Taper": ["-","TapedCell.Vision","TapedCell.Handling","TapedCell.Transfer"],
+      "Inspection": ["-","Cell Inspector","TapedCell.Vision","Final Inspection"]
+    },
+    assyByUnit: {
+      "Cell Inspector": ["-","Cell. Suction Conveyor","Cell. Short Inspector","Cell. Vision Inspector","Cell. NG Mark Vision","Cell. Short Inspector Linear","Cell. Vision Inspector Linear","Cell. Blow & Suction","Cell. Thickness Sensor"],
+      "Cell.Inspector": ["-","Cell. Suction Conveyor","Cell. Short Inspector","Cell. Vision Inspector","Cell. NG Mark Vision"],
+      "LMS": ["-","LMS.Camera","LMS.Light","LMS.PLC"],
+      "HalfCell.Stack": ["-","Half Cell. Buffer Table","Half Cell. Vision NG Box","Half Cell. Scara Robot","Half Cell. Vision"],
+      "HalfCell.Loading": ["-","Half Cell. Loading Conveyor","Half Cell. Loading Robot"],
+      "[01]StackedCell.Taper": ["-","[01]StackedCell.Taper Head","[01]StackedCell.Vision"],
+      "[02]StackedCell.Taper": ["-","[02]StackedCell.Taper Head","[02]StackedCell.Vision"],
+      "[01]Cell.Stacker": ["-","Cell. Pusher","[01/A] Cell. Gripper","[02/A] Cell. Gripper","[03/A] Cell. Gripper","[01/B] Cell. Gripper","[02/B] Cell. Gripper","[03/B] Cell. Gripper","Cell. Align Vision","Cell. Align Table","Table Transfer Linear","Cell. Stack Vision"],
+      "[02]Cell.Stacker": ["-","Cell. Pusher","[01/A] Cell. Gripper","[02/A] Cell. Gripper","[03/A] Cell. Gripper","Cell. Align Vision","Cell. Align Table","Cell. Stack Vision"],
+      "[03]Cell.Stacker": ["-","Cell. Pusher","Cell. Align Vision","Cell. Align Table","Cell. Stack Vision"],
+      "TapedCell.Vision": ["-","[01] Taped Cell. Pick & Place","[Upper/Lower] Taped Cell. Vision","[4-side] Taped Cell. Vision","Taped Cell. Rotating Table","[02] Taped Cell. Pick & Place","Taped Cell. Weight Inspector"],
+      "Final Inspection": ["-","Final. Vision","Final. Sorting","Final. Labeling"],
+      "Cell.Stack Vision": ["-","Stack Vision Camera","Stack Vision Light","Stack Vision Trigger"]
+    }
+  };
+
+  // ---------- UI refs ----------
+  const el = (id)=>document.getElementById(id);
+  const site = el("site"), line = el("line"), machine = el("machine"), unit = el("unit"), assy = el("assy");
+
+  // ---------- Fill helpers ----------
+  function fillSelect(sel, options){
+    sel.innerHTML = "";
+    options.forEach(v=>{
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      sel.appendChild(o);
+    });
+  }
+
+  function init(){
+    fillSelect(site, DATA.sites);
+    fillSelect(line, DATA.lines);
+    fillSelect(machine, DATA.machines);
+
+    // default selections like screenshots
+    site.value = "NSE";
+    line.value = "-";
+    machine.value = "-";
+
+    refreshUnit();
+    refreshAssy();
+
+    // set default time = now
+    const now = new Date();
+    const pad = n => String(n).padStart(2,"0");
+    const local = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    el("startTime").value = local;
+    el("endTime").value = local;
+  }
+
+  function refreshUnit(){
+    const m = machine.value;
+    const units = DATA.unitsByMachine[m] || ["-"];
+    fillSelect(unit, units);
+    unit.value = units[0] || "-";
+  }
+
+  function refreshAssy(){
+    const u = unit.value;
+    const a = DATA.assyByUnit[u] || ["-"];
+    fillSelect(assy, a);
+    assy.value = a[0] || "-";
+  }
+
+  machine.addEventListener("change", ()=>{ refreshUnit(); refreshAssy(); });
+  unit.addEventListener("change", ()=>{ refreshAssy(); });
+
+  // ---------- Tabs (same page; just label change if you want later) ----------
+  let activeTab = "A";
+  function setTab(which){
+    activeTab = which;
+    el("tabA").classList.toggle("active", which==="A");
+    el("tabB").classList.toggle("active", which==="B");
+  }
+  el("tabA").addEventListener("click", ()=>setTab("A"));
+  el("tabB").addEventListener("click", ()=>setTab("B"));
+
+  // ---------- Language toggle ----------
+  const I18N = {
+    KR: {
+      pageTitle: "Parameter 변경이력 및 부동&작업내역 양식 입력",
+      langLabel:"언어",
+      tabA:"Para/IP 변경공유",
+      tabB:"부동내역 공유",
+      lblType:"종류 :",
+      lblSite:"0. Site :",
+      lblLine:"1. 호기 :",
+      lblMachine:"2-1. Machine :",
+      lblUnit:"2-2. Unit :",
+      lblAssy:"2-3. Assy :",
+      lblStart:"3-1. 발생시간 :",
+      lblEnd:"3-2. 조치완료 :",
+      lblWorker:"4. 작업자 :",
+      lblSymptom:"5. 현상 :",
+      lblCause:"6. 원인 :",
+      lblAction:"7. 조치 :",
+      workerPH:"작업자 이름",
+      symptomPH:"현상 입력",
+      causePH:"원인 입력",
+      actionPH:"조치 내용 입력",
+      btnGenerate:"양식 생성하기",
+      hint:"생성 후 결과를 복사해서 공유할 수 있습니다."
+    },
+    EN: {
+      pageTitle: "Parameter Change + Downtime/Work Detail Template",
+      langLabel:"Lang",
+      tabA:"Para/IP Change Share",
+      tabB:"Downtime Share",
+      lblType:"Type :",
+      lblSite:"0. Site :",
+      lblLine:"1. Line :",
+      lblMachine:"2-1. Machine :",
+      lblUnit:"2-2. Unit :",
+      lblAssy:"2-3. Assy :",
+      lblStart:"3-1. Start Time :",
+      lblEnd:"3-2. End Time :",
+      lblWorker:"4. Worker :",
+      lblSymptom:"5. Symptom :",
+      lblCause:"6. Cause :",
+      lblAction:"7. Action :",
+      workerPH:"Worker name",
+      symptomPH:"Enter symptom",
+      causePH:"Enter cause",
+      actionPH:"Enter action taken",
+      btnGenerate:"Generate Template",
+      hint:"After generating, copy and share."
+    }
+  };
+
+  let LANG = "KR";
+  function applyLang(){
+    const t = I18N[LANG];
+    el("pageTitle").textContent = t.pageTitle;
+    el("langLabel").textContent = t.langLabel;
+    el("tabA").textContent = t.tabA;
+    el("tabB").textContent = t.tabB;
+
+    el("lblType").textContent = t.lblType;
+    el("lblSite").textContent = t.lblSite;
+    el("lblLine").textContent = t.lblLine;
+    el("lblMachine").textContent = t.lblMachine;
+    el("lblUnit").textContent = t.lblUnit;
+    el("lblAssy").textContent = t.lblAssy;
+    el("lblStart").textContent = t.lblStart;
+    el("lblEnd").textContent = t.lblEnd;
+    el("lblWorker").textContent = t.lblWorker;
+    el("lblSymptom").textContent = t.lblSymptom;
+    el("lblCause").textContent = t.lblCause;
+    el("lblAction").textContent = t.lblAction;
+
+    el("worker").placeholder = t.workerPH;
+    el("symptom").placeholder = t.symptomPH;
+    el("cause").placeholder = t.causePH;
+    el("action").placeholder = t.actionPH;
+
+    el("btnGenerate").textContent = t.btnGenerate;
+    el("hintText").textContent = t.hint;
+
+    el("btnKR").classList.toggle("active", LANG==="KR");
+    el("btnEN").classList.toggle("active", LANG==="EN");
+
+    localStorage.setItem("bmpd_lang", LANG);
+  }
+
+  el("btnKR").addEventListener("click", ()=>{ LANG="KR"; applyLang(); });
+  el("btnEN").addEventListener("click", ()=>{ LANG="EN"; applyLang(); });
+
+  // ---------- Output / Copy ----------
+  el("btnGenerate").addEventListener("click", ()=>{
+    const t = I18N[LANG];
+
+    const txt =
+`${t.lblType} ${el("type").value}
+${t.lblSite} ${site.value}
+${t.lblLine} ${line.value}
+${t.lblMachine} ${machine.value}
+${t.lblUnit} ${unit.value}
+${t.lblAssy} ${assy.value}
+${t.lblStart} ${el("startTime").value}
+${t.lblEnd} ${el("endTime").value}
+${t.lblWorker} ${el("worker").value || "-"}
+${t.lblSymptom}
+${el("symptom").value || "-"}
+${t.lblCause}
+${el("cause").value || "-"}
+${t.lblAction}
+${el("action").value || "-"}`;
+
+    el("outText").textContent = txt;
+    el("outBox").style.display = "block";
+  });
+
+  el("btnCopy").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(el("outText").textContent);
+      el("btnCopy").textContent = "Copied";
+      setTimeout(()=>el("btnCopy").textContent="Copy", 1200);
+    }catch(e){
+      alert("Copy blocked by browser policy. Select text manually and copy.");
+    }
+  });
+
+  el("btnClear").addEventListener("click", ()=>{
+    ["worker","symptom","cause","action"].forEach(id=>el(id).value="");
+    el("outBox").style.display = "none";
+  });
+
+  // ---------- start ----------
+  const saved = localStorage.getItem("bmpd_lang");
+  if(saved==="EN" || saved==="KR") LANG = saved;
+  init();
+  applyLang();
+</script>
+</body>
+</html>
