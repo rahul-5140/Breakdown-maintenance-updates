@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Breakdown & Maintenance Updates</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+   body {
+     font-family: Arial, sans-serif;
+     background:#0f172a;
+     color:#e5e7eb;
+     margin:0;
+     padding:20px;
+   }
+   h1 {
+     text-align:center;
+     color:#22c55e;
+   }
+   .box {
+     max-width:700px;
+     margin:auto;
+     background:#020617;
+     padding:20px;
+     border-radius:10px;
+     box-shadow:0 0 15px #000;
+   }
+   label {
+     display:block;
+     margin-top:15px;
+     font-weight:bold;
+   }
+   input, select, textarea {
+     width:100%;
+     padding:10px;
+     margin-top:5px;
+     border-radius:6px;
+     border:none;
+     outline:none;
+   }
+   button {
+     margin-top:20px;
+     width:100%;
+     padding:12px;
+     background:#22c55e;
+     border:none;
+     border-radius:8px;
+     font-size:16px;
+     font-weight:bold;
+     cursor:pointer;
+   }
+   button:hover {
+     background:#16a34a;
+   }
+   .log {
+     margin-top:30px;
+     background:#020617;
+     padding:15px;
+     border-radius:10px;
+   }
+   .entry {
+     border-bottom:1px solid #1f2933;
+     padding:10px 0;
+   }
+   .time {
+     color:#38bdf8;
+     font-size:12px;
+   }
+</style>
+</head>
+<body>
+<h1>Breakdown & Maintenance Updates</h1>
+<div class="box">
+<label>Line / Machine</label>
+<input id="machine" placeholder="Ex: Line 2 – DStack 1">
+<label>Issue Type</label>
+<select id="type">
+<option>Breakdown</option>
+<option>Maintenance</option>
+<option>Inspection</option>
+</select>
+<label>Problem Description</label>
+<textarea id="problem" rows="3"></textarea>
+<label>Action Taken</label>
+<textarea id="action" rows="3"></textarea>
+<label>Status</label>
+<select id="status">
+<option>Open</option>
+<option>In Progress</option>
+<option>Resolved</option>
+</select>
+<button onclick="addLog()">Save Update</button>
+</div>
+<div class="log" id="log"></div>
+<script>
+function addLog(){
+ let m = machine.value;
+ let t = type.value;
+ let p = problem.value;
+ let a = action.value;
+ let s = status.value;
+ if(m === "" || p === "") {
+   alert("Fill at least Machine and Problem");
+   return;
+ }
+ let time = new Date().toLocaleString();
+ let div = document.createElement("div");
+ div.className = "entry";
+ div.innerHTML = `
+<div class="time">${time}</div>
+<b>${t}</b> | ${s}<br>
+<b>Machine:</b> ${m}<br>
+<b>Problem:</b> ${p}<br>
+<b>Action:</b> ${a}
+ `;
+ log.prepend(div);
+ machine.value="";
+ problem.value="";
+ action.value="";
+}
+</script>
+</body>
+</html>
