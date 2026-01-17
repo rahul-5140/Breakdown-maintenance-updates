@@ -1,187 +1,344 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PRI L&S Para / Floating History</title>
-
-<style>
-body {
-    font-family: 'Malgun Gothic', sans-serif;
-    background:#f0f0f0;
-    margin:0;
-}
-.container {
-    max-width:600px;
-    margin:auto;
-    padding:20px;
-}
-.header {
-    background:#4a4a4a;
-    color:white;
-    padding:20px;
-    text-align:center;
-}
-.lang-toggle {
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    margin-bottom:10px;
-}
-.lang-toggle button {
-    padding:6px 12px;
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
-}
-.lang-toggle button.active {
-    background:#4a4a4a;
-    color:white;
-}
-.tab-container {
-    display:flex;
-    background:#e0e0e0;
-}
-.tab {
-    flex:1;
-    padding:15px;
-    text-align:center;
-    cursor:pointer;
-    font-weight:bold;
-}
-.tab.active { background:white; }
-.form-container {
-    background:white;
-    padding:20px;
-}
-.form { display:none; }
-.form.active { display:block; }
-.form-group { margin-bottom:15px; }
-label { font-weight:bold; display:block; margin-bottom:5px; }
-input, select, textarea {
-    width:100%;
-    padding:10px;
-}
-.button {
-    background:#4a4a4a;
-    color:white;
-    padding:12px;
-    border:none;
-    width:100%;
-    cursor:pointer;
-}
-.result {
-    display:none;
-    margin-top:20px;
-    padding:15px;
-    background:#f9f9f9;
-}
-</style>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title _msttexthash="1578135" _msthash="73">PRI L&amp;S Parachange/Floating History Sharing Form</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-container {
+            display: flex;
+            background-color: #e0e0e0;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab.active {
+            background-color: white;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form {
+            display: none;
+        }
+        .form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #5a5a5a;
+        }
+        .footer {
+            text-align: right;
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        #copyButton {
+            margin-right: 10px;
+            background-color: #28a745;
+        }
+        #shareButton {
+            background-color: #4267B2;
+            color: white;
+        }
+        #uploadButton {
+            background-color:  #28a745;
+            color: white;
+        }
+        #openButton {
+            background-color: #962527;
+            color: white;
+        }
+        .alert-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none; /* 초기에는 숨김 */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .alert-box.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+    <!-- 카카오 SDK 제거 - Web Share API 사용 -->
 </head>
 
 <body>
-<div class="container">
-
-<!-- LANGUAGE TOGGLE -->
-<div class="lang-toggle">
-    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
-    <button id="btn-kr" onclick="setLang('kr')">KR</button>
+<!-- LANGUAGE TOGGLE (UI ONLY) -->
+<div style="display:flex; justify-content:flex-end; gap:10px; margin:10px;">
+  <button id="btn-en" onclick="setLang('en')" style="padding:6px 12px;font-weight:bold;">EN</button>
+  <button id="btn-kr" onclick="setLang('kr')" style="padding:6px 12px;font-weight:bold;">KR</button>
 </div>
 
-<div class="header">
-    <h1 data-i18n="title">PRI L&S Para Change / Floating History</h1>
-    <p data-i18n="subtitle">Enter Parameter Change & Floating History</p>
-</div>
+    <div class="container">
+        <div class="header">
+            <h1 _msttexthash="1539499" _msthash="74">PRI L&amp;S Para Change History Floating History Form</h1>
+            <p _msttexthash="2415127" _msthash="75">Enter Parameter Change History and Floating &amp; Work History Form</p>
+        </div>
+        
+        <div class="tab-container">
+          <div class="tab" onclick="switchTab('parameterForm')" _msttexthash="416078" _msthash="76">Para/IP Change Sharing</div>
+          <div class="tab active" onclick="switchTab('troubleForm')" _msttexthash="466635" _msthash="77">Share floating history</div>
+        </div>
+        
+        <div class="form-container">
+            <!-- 파라미터 변경 폼 -->
+            <div id="parameterForm" class="form" _mstvisible="0">
+            <!-- 원래거 div id="parameterForm" class="form active" -->
 
-<div class="tab-container">
-    <div class="tab" onclick="switchTab('parameterForm')" data-i18n="tab_para">
-        Para/IP Change Sharing
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-site" _msttexthash="74659" _msthash="78" _mstvisible="2">0. Site :</label>
+                    <select id="para-site" _mstvisible="2">
+                        <option value="-" _mstvisible="3">-</option>
+                        <option value="WA" _msttexthash="14677" _msthash="79" _mstvisible="3">WA</option>
+                        <option value="WA5" _msttexthash="20878" _msthash="80" _mstvisible="3">WA5</option>
+                        <option value="UC1" _msttexthash="20436" _msthash="81" _mstvisible="3">UC1</option>
+                        <option value="UC2" _msttexthash="20553" _msthash="82" _mstvisible="3">UC2</option>
+                        <option value="MI1" _msttexthash="20332" _msthash="83" _mstvisible="3">MI1</option>
+                        <option value="MI2" _msttexthash="20449" _msthash="84" _mstvisible="3">MI2</option>
+                        <option value="MI3" _msttexthash="20566" _msthash="85" _mstvisible="3">MI3</option>
+                        <option value="NSE" _msttexthash="23803" _msthash="86" _mstvisible="3">NSE</option>
+                        <option value="L-H" _msttexthash="20020" _msthash="87" _mstvisible="3">L-H</option>
+                    </select>
+                </div>
+
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-machine" _msttexthash="115544" _msthash="88" _mstvisible="2">1. Volume:</label>
+                    <select id="para-machine" _mstvisible="2">
+                        <option value="-" _mstvisible="3">-</option>
+
+
+                    </select>
+                </div>
+
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-process" _msttexthash="161993" _msthash="89" _mstvisible="2">2-1. Machine :</label>
+                    <select id="para-process" _mstvisible="2"><option value="-" _mstvisible="3">-</option><option value="Electrode Supply" _msttexthash="291330" _msthash="90" _mstvisible="3">Electrode Supply</option><option value="Lamination" _msttexthash="157508" _msthash="91" _mstvisible="3">Lamination</option><option value="D-Stacking" _msttexthash="145041" _msthash="92" _mstvisible="3">D-Stacking</option><option value="Taper" _msttexthash="60268" _msthash="93" _mstvisible="3">Taper</option><option value="Inspection" _msttexthash="159224" _msthash="94" _mstvisible="3">Inspection</option></select>
+                </div>
+
+
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-unit" _msttexthash="100542" _msthash="95" _mstvisible="2">2-2. Unit :</label>
+                    <select id="para-unit" _mstvisible="2">
+                        <option value="-" _mstvisible="3">-</option>
+
+                    </select>
+                </div>
+
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-assy" _msttexthash="109538" _msthash="96" _mstvisible="2">2-3. Assy' :</label>
+                    <select id="para-assy" _mstvisible="2">
+                        <option value="-" _mstvisible="3">-</option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-time" _msttexthash="204113" _msthash="97" _mstvisible="2">3. Change time:</label>
+                    <input type="datetime-local" id="para-time" _mstvisible="2">
+                </div>
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-worker" _msttexthash="131989" _msthash="98" _mstvisible="2">4. Changer:</label>
+                    <input type="text" id="para-worker" placeholder="작업자 이름" _mstplaceholder="29320967" _mstvisible="2">
+                </div>
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-parameter" _msttexthash="195780" _msthash="99" _mstvisible="2">5. ChangePara:</label>
+                    <input type="text" id="para-parameter" placeholder="변경 파라미터 입력" _mstplaceholder="53870687" _mstvisible="2">
+                </div>
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-before" _msttexthash="296816" _msthash="100" _mstvisible="2">6. Transfer value:</label>
+                    <input type="text" id="para-before" placeholder="이전 값 입력" _mstplaceholder="28506699" _mstvisible="2">
+                </div>
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-after" _msttexthash="232427" _msthash="101" _mstvisible="2">7. Change value:</label>
+                    <input type="text" id="para-after" placeholder="변경 값 입력" _mstplaceholder="27531127" _mstvisible="2">
+                </div>
+                <div class="form-group" _mstvisible="1">
+                    <label for="para-reason" _msttexthash="353223" _msthash="102" _mstvisible="2">8. Reason for change:</label>
+                    <textarea id="para-reason" placeholder="변경 사유 입력" _mstplaceholder="36051899" _mstvisible="2"></textarea>
+                </div>
+                <button class="button" onclick="generateParameterText()" _msttexthash="179127" _msthash="103" _mstvisible="1">Create a form</button>
+            </div>
+            
+            <!-- 부동내역 폼 -->
+
+            <!-- 원래거 div id="troubleForm" class="form" -->
+            <div id="troubleForm" class="form active">
+                <div class="form-group">
+                    <label for="trouble-type" _msttexthash="71955" _msthash="104">Types:</label>
+                    <select id="trouble-type">
+                        <option value="BM" _msttexthash="14014" _msthash="105">BM</option>
+                        <option value="PD" _msttexthash="14352" _msthash="106">PD</option>
+                        <option value="PM" _msttexthash="15288" _msthash="107">PM</option>
+                        <option value="생산준비" _msttexthash="21975447" _msthash="108">Preparation for production</option>
+                    </select>                   
+                </div>
+
+                <div class="form-group">
+                    <label for="trouble-site" _msttexthash="74659" _msthash="109">0. Site :</label>
+                    <select id="trouble-site">
+                        <option value="-">-</option>
+                        <option value="WA" _msttexthash="14677" _msthash="110">WA</option>
+                        <option value="WA5" _msttexthash="20878" _msthash="111">WA5</option>
+                        <option value="UC1" _msttexthash="20436" _msthash="112">UC1</option>
+                        <option value="UC2" _msttexthash="20553" _msthash="113">UC2</option>
+                        <option value="MI1" _msttexthash="20332" _msthash="114">MI1</option>
+                        <option value="MI2" _msttexthash="20449" _msthash="115">MI2</option>
+                        <option value="MI3" _msttexthash="20566" _msthash="116">MI3</option>
+                        <option value="NSE" _msttexthash="23803" _msthash="117">NSE</option>
+                        <option value="L-H" _msttexthash="20020" _msthash="118">L-H</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trouble-machine" _msttexthash="115544" _msthash="119">1. Volume:</label>
+                    <select id="trouble-machine"><option value="-">-</option><option value="1-1" _msttexthash="14872" _msthash="120">1-1</option><option value="1-2" _msttexthash="14989" _msthash="121">1-2</option><option value="1-3" _msttexthash="15106" _msthash="122">1-3</option><option value="1-4" _msttexthash="15223" _msthash="123">1-4</option><option value="1-5" _msttexthash="15340" _msthash="124">1-5</option><option value="1-H" _msttexthash="17563" _msthash="125">1-H</option><option value="2-1" _msttexthash="14963" _msthash="126">2-1</option><option value="2-2" _msttexthash="15080" _msthash="127">2-2</option><option value="2-3" _msttexthash="15197" _msthash="128">2-3</option><option value="2-4" _msttexthash="15314" _msthash="129">2-4</option><option value="2-5" _msttexthash="15431" _msthash="130">2-5</option><option value="2-H" _msttexthash="17654" _msthash="131">2-H</option><option value="3-1" _msttexthash="15054" _msthash="132">3-1</option><option value="3-2" _msttexthash="15171" _msthash="133">3-2</option><option value="3-3" _msttexthash="15288" _msthash="134">3-3</option><option value="3-4" _msttexthash="15405" _msthash="135">3-4</option><option value="3-5" _msttexthash="15522" _msthash="136">3-5</option><option value="4-1" _msttexthash="15145" _msthash="137">4-1</option><option value="4-2" _msttexthash="15262" _msthash="138">4-2</option><option value="4-3" _msttexthash="15379" _msthash="139">4-3</option><option value="4-4" _msttexthash="15496" _msthash="140">4-4</option><option value="4-5" _msttexthash="15613" _msthash="141">4-5</option><option value="4-6" _msttexthash="15730" _msthash="142">4-6</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="trouble-process" _msttexthash="161993" _msthash="143">2-1. Machine :</label>
+                    <select id="trouble-process"><option value="-">-</option><option value="Electrode Supply" _msttexthash="291330" _msthash="144">Electrode Supply</option><option value="Lamination" _msttexthash="157508" _msthash="145">Lamination</option><option value="D-Stacking" _msttexthash="145041" _msthash="146">D-Stacking</option><option value="Taper" _msttexthash="60268" _msthash="147">Taper</option><option value="Inspection" _msttexthash="159224" _msthash="148">Inspection</option></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trouble-unit" _msttexthash="100542" _msthash="149">2-2. Unit :</label>
+                    <select id="trouble-unit"><option value="-">-</option><option value="TapedCell.Vision" _msttexthash="297115" _msthash="189">TapedCell.Vision</option><option value="TapedCell.Rotate" _msttexthash="294593" _msthash="188">TapedCell.Rotate</option><option value="TapedCell.ShortInspector" _msttexthash="590941" _msthash="187">TapedCell.ShortInspector</option><option value="Cell.TrackingSystem" _msttexthash="404950" _msthash="186">Cell.TrackingSystem</option><option value="TapedCell.Transfer" _msttexthash="360204" _msthash="185">TapedCell.Transfer</option><option value="TapedCell.Unloader" _msttexthash="356980" _msthash="184">TapedCell.Unloader</option></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trouble-assy" _msttexthash="109538" _msthash="156">2-3. Assy' :</label>
+                    <select id="trouble-assy"><option value="-">-</option><option value="[01] Taped Cell. Pick &amp; Place" _msttexthash="519389" _msthash="157">[01] Taped Cell. Pick &amp; Place</option><option value="[Upper/Lower] Taped Cell. Vision" _msttexthash="777231" _msthash="158">[Upper/Lower] Taped Cell. Vision</option><option value="[4-side] Taped Cell. Vision" _msttexthash="557453" _msthash="159">[4-side] Taped Cell. Vision</option><option value="Taped Cell. Rotating Table" _msttexthash="532636" _msthash="160">Taped Cell. Rotating Table</option><option value="[02] Taped Cell. Pick &amp; Place" _msttexthash="519506" _msthash="161">[02] Taped Cell. Pick &amp; Place</option><option value="Taped Cell. Weight Inspector" _msttexthash="629044" _msthash="162">Taped Cell. Weight Inspector</option></select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="trouble-time" _msttexthash="375167" _msthash="163">3-1. Occurrence time:</label>
+                    <input type="datetime-local" id="trouble-time" max="2026-01-18T16:50">
+                </div>
+                <div class="form-group">
+                    <label for="trouble-complete" _msttexthash="608413" _msthash="164">3-2. Completion of Measures:</label>
+                    <input type="datetime-local" id="trouble-complete" max="2026-01-18T16:50" min="2026-01-17T11:50">
+                </div>
+                <div class="form-group">
+                    <label for="trouble-worker" _msttexthash="139425" _msthash="165">4. Workers:</label>
+                    <input type="text" id="trouble-worker" placeholder="작업자 이름" required="" _mstplaceholder="29320967">
+                </div>
+                <div class="form-group">
+                    <label for="trouble-problem" _msttexthash="209859" _msthash="166">5. Phenomenon:</label>
+                    <textarea id="trouble-problem" placeholder="현상 입력" _mstplaceholder="22221927"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="trouble-reason" _msttexthash="114127" _msthash="167">6. Causes:</label>
+                    <textarea id="trouble-reason" placeholder="원인 입력" _mstplaceholder="22046531"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="trouble-action" _msttexthash="113321" _msthash="168">7. Action:</label>
+                    <textarea id="trouble-action" placeholder="조치 내용 입력" _mstplaceholder="36725117"></textarea>
+                </div>
+                <button class="button" onclick="generateTroubleText()" _msttexthash="179127" _msthash="169">Create a form</button>
+            </div>
+            
+            <!-- 결과 표시 영역 -->
+            <!-- <div id="result" class="result">
+                <p id="resultText"></p>
+                <div>
+                    <button id="uploadButton" class="button" onclick="uploadContent()">업로드 및 공유하기</button>
+                    <button id="openButton" class="button" onclick="openContent()">부동내역 시트</button>
+                </div>
+            </div> -->
+
+            <div id="result" class="result" _msthidden="2" style="display: none;">
+                <p id="resultText"></p>
+                <div id="statusMessage" style="display:none; text-align:center; color:#555;" _msttexthash="25027782" _msthidden="1" _msthash="170">⏳ 업로드 중...</div>
+                <div _msthidden="1">
+                    <button id="uploadButton" class="button" onclick="uploadContent()" _msttexthash="52821028" _msthidden="1" _msthash="171">업로드 및 공유하기</button>
+                    <!-- <button id="openButton" class="button" onclick="openContent()">부동내역 시트</button> -->
+                </div>
+            </div>
+
+            <div id="status-alert" class="alert-box">
+                <span id="alert-message"></span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            @
+        </div>
     </div>
-    <div class="tab active" onclick="switchTab('troubleForm')" data-i18n="tab_trouble">
-        Share Floating History
-    </div>
-</div>
 
-<div class="form-container">
-
-<!-- PARAMETER FORM -->
-<div id="parameterForm" class="form">
-    <div class="form-group">
-        <label data-i18n="site">0. Site :</label>
-        <select id="para-site"></select>
-    </div>
-    <div class="form-group">
-        <label data-i18n="volume">1. Volume :</label>
-        <select id="para-machine"></select>
-    </div>
-    <button class="button" onclick="generateParameterText()" data-i18n="create">
-        Create Form
-    </button>
-</div>
-
-<!-- TROUBLE FORM -->
-<div id="troubleForm" class="form active">
-    <div class="form-group">
-        <label data-i18n="type">Type :</label>
-        <select id="trouble-type">
-            <option>BM</option>
-            <option>PD</option>
-            <option>PM</option>
-            <option>Preparation for production</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label data-i18n="site">0. Site :</label>
-        <select id="trouble-site"></select>
-    </div>
-    <button class="button" onclick="generateTroubleText()" data-i18n="create">
-        Create Form
-    </button>
-</div>
-
-<div id="result" class="result">
-    <pre id="resultText"></pre>
-</div>
-
-</div>
-
-<script>
-/* ================= LANGUAGE SYSTEM (UI ONLY) ================= */
-
-const translations = {
-    en: {
-        title: "PRI L&S Para Change / Floating History",
-        subtitle: "Enter Parameter Change & Floating History",
-        tab_para: "Para/IP Change Sharing",
-        tab_trouble: "Share Floating History",
-        site: "0. Site :",
-        volume: "1. Volume :",
-        type: "Type :",
-        create: "Create Form"
-    },
-    kr: {
-        title: "PRI L&S 파라미터 / 부동 내역",
-        subtitle: "파라미터 변경 및 부동 내역 입력",
-        tab_para: "파라/IP 변경 공유",
-        tab_trouble: "부동 내역 공유",
-        site: "0. Site :",
-        volume: "1. 호기 :",
-        type: "종류 :",
-        create: "양식 생성"
-    }
-};
-
-function setLang(lang) {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        el.innerText = translations[lang][key];
-    });
-    document.getElementById("btn-en").classList.toggle("active", lang === "en");
-    document.getElementById("btn-kr").classList.toggle("active", lang === "kr");
-}
-</script>
-
-<script>
+    <script>
+        
 // site 값에 따라 process 옵션 목록 정의
 const siteToProcess = {
   MI1:       ['Electrode Supply', 'Lamination', 'Stacking', 'Taper', 'Inspection'],
@@ -1417,7 +1574,46 @@ document.getElementById('trouble-unit').addEventListener('change', function () {
                 });
         }
 
+    </script>
+
+
+
+
+<script>
+/* ================= LANGUAGE SYSTEM (UI ONLY) ================= */
+const translations = {
+  en: {
+    title: "PRI L&S Para Change History Floating History Form",
+    subtitle: "Enter Parameter Change History and Floating & Work History Form",
+    tab_para: "Para/IP Change Sharing",
+    tab_trouble: "Share floating history",
+    site: "0. Site :",
+    volume: "1. Volume:",
+    type: "Types:",
+    create: "Create a form"
+  },
+  kr: {
+    title: "PRI L&S Para Change History Floating History Form",
+    subtitle: "파라미터 변경 및 부동/작업 내역 입력",
+    tab_para: "Para/IP 변경 공유",
+    tab_trouble: "부동 내역 공유",
+    site: "0. Site :",
+    volume: "1. 호기:",
+    type: "종류:",
+    create: "양식 생성"
+  }
+};
+
+function setLang(lang){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    if(translations[lang][key]) el.innerText = translations[lang][key];
+  });
+  document.getElementById("btn-en").style.background = lang==="en" ? "#4a4a4a":"#ddd";
+  document.getElementById("btn-en").style.color = lang==="en" ? "white":"black";
+  document.getElementById("btn-kr").style.background = lang==="kr" ? "#4a4a4a":"#ddd";
+  document.getElementById("btn-kr").style.color = lang==="kr" ? "white":"black";
+}
 </script>
 
 </body>
-</html>
